@@ -1,0 +1,31 @@
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const sandbox={window:{}};
+vm.runInNewContext(fs.readFileSync(path.join(root,'editor/render-core.js'),'utf8'),sandbox);
+const R=sandbox.window.TalentSignalRenderer;
+const seed={window:{}};
+vm.runInNewContext(fs.readFileSync(path.join(root,'editor/seed.js'),'utf8'),seed);
+const project=R.validateProject(seed.window.TALENT_SIGNAL_SEED);
+const fakeContext={font:'',measureText(t){return {width:Array.from(t).reduce((n,c)=>n+(/[\x00-\x7f]/.test(c)?7:14),0)};}};
+const clone=x=>JSON.parse(JSON.stringify(x));
+const title=project.layers[0];
+let p=clone(project);p.layers[0].text='甲人才密度乙';p.layers[0].highlight='人才密度';p.layers[0].width=42;
+const m=R.measureLayers(fakeContext,p)[0];
+assert.equal(m.lines.map(l=>l.text).join(''),'甲人才密度乙');
+assert.deepEqual(Array.from(m.ranges[0]),[1,5]);
+assert.equal(m.lines.length,2);
+p=clone(project);p.layers[0].text='AI Native team';p.layers[0].width=60;
+const lines=R.measureLayers(fakeContext,p)[0].lines.map(l=>l.text);
+assert.ok(lines.some(l=>l.includes('Native')),'English words must not split when they fit');
+for(const mutate of [p=>p.background.src='https://example.com/a.png',p=>p.layers[0].fontSize=Infinity,p=>p.layers[0].color='red',p=>p.layers[1].id='title',p=>p.schemaVersion=0,p=>p.layers[0].fontFamily='remote-font']){
+ const x=clone(project);mutate(x);assert.throws(()=>R.validateProject(x));
+}
+p=clone(project);p.layers.forEach(l=>l.visible=true);p.layers[0].visible=false;
+assert.equal(R.measureLayers(fakeContext,p).length,2);
+p=clone(project);p.layers[0].y=1850;
+assert.ok(R.warnings(p,R.measureLayers(fakeContext,p)).some(x=>x.includes('超出画布')));
+assert.equal(title.text,project.layers[0].text);
+console.log('PASS: embedded-source validation, font restrictions, wrap/highlight indices, hidden layers, overflow');

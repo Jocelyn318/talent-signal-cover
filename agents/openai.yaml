@@ -1,0 +1,4 @@
+interface:
+  display_name: "Talent Signal 封面"
+  short_description: "先确认内容与视觉提案，再生成未来复古无字背景，配套独立文字编辑器"
+  default_prompt: "使用 $talent-signal-cover 理解我提供的内容，先提交封面提案供我确认，不要立即生图。"
