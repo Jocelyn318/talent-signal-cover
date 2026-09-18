@@ -4,6 +4,8 @@
 
 ## 使用
 
+首次使用请看 [同事部署与使用说明](DEPLOYMENT-AND-USAGE.md)：访问邀请、Skill 安装、macOS／Windows 本地启动、封面工作流、保存交接和排错。
+
 Skill 入口：[SKILL.md](SKILL.md)。将整个目录保留为 `talent-signal-cover`，通过支持本地 Skill 的客户端加载；不要只复制 SKILL.md，否则图片、字体与编辑器会缺失。可将整个目录复制到自己的技能目录后按客户端要求重新加载。
 
 示例请求：`使用 $talent-signal-cover 阅读下面的正文，先给我封面提案，确认前不要生图。`
