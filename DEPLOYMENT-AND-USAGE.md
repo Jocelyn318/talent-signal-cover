@@ -1,19 +1,19 @@
 # 同事部署与使用说明
 
-适用仓库：<https://github.com/Jocelyn318/talent-signal-cover>。这是一个私有的本地工作包，不是多人在线网站。
+适用仓库：<https://github.com/Jocelyn318/talent-signal-cover>。仓库现已公开，任何人都可浏览和下载。这仍是一个本地工作包，不是多人在线网站。
 
-## 1. 获取访问权限
+## 1. 获取公开仓库
 
-把你的 GitHub 用户名发给仓库所有者。收到协作邀请后，登录对应账号并接受邀请，再打开仓库。看到 404 时先检查是否登录正确账号、是否接受邀请；不要因此要求仓库改成公开。
+直接打开仓库即可阅读，下载或 HTTPS 克隆无需协作邀请，也通常无需登录。点击 Code → Download ZIP 可下载完整包，或使用下方 git clone 命令。只使用 Skill 和编辑器不需要仓库写入权限。
 
-注意：此仓库属于个人账号，GitHub 的私有个人仓库协作者具有读写权限，不能设为只读。只需使用时请不要直接改 main；需要修改规范或代码时开分支和 Pull Request，由维护者审阅。若将来必须区分只读与写入，应另行讨论组织仓库，不默认迁移。依据：[GitHub 个人仓库权限说明](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/repository-access-and-collaboration/permission-levels-for-a-personal-account-repository)。
+公开不意味着所有人都能直接修改仓库。希望贡献变更时，登录自己的 GitHub 账号，Fork 后在分支上修改并提交 Pull Request；已有写权限的同事也请用分支和 Pull Request，由维护者审阅，不直接改 main。
 
 ## 2. 你需要什么
 
 |用途|依赖|
 |理解内容、提案与生图|支持本地 Skill 的 Codex 环境，以及可用的图像生成／编辑工具|
 |本地文字编辑器|Python 3、现代桌面浏览器|
-|克隆和更新仓库|Git 及你自己的 GitHub 认证；也可从仓库 Code 菜单下载 ZIP|
+|克隆和更新仓库|Git；公开 HTTPS 克隆无需协作邀请，也可从仓库 Code 菜单下载 ZIP|
 |可选的项目生成脚本和 JS 测试|Node.js 18 或更高版本|
 
 仓库不带模型、API 密钥或图像生成额度；安装 Skill 不会自动给账号开通生图能力。编辑器本身不调用 AI，只有导入背景和文字排版功能。字体已随包，无须 npm install 或连接外部字体网站。
@@ -23,14 +23,14 @@
 在你自己的 Codex 中发送：
 
 ```text
-使用 skill-installer，将我的可访问私有仓库
+使用 skill-installer，将以下公开仓库
 https://github.com/Jocelyn318/talent-signal-cover
 的根目录安装为 talent-signal-cover。
 请安装完整目录，包括 references、assets、editor 和 scripts。
 若同名技能已存在，先告诉我，不要直接覆盖。
 ```
 
-私有仓库下载需要本机 Git 凭据或相应连接权限。认证由你自己完成，不把密码、令牌或验证码发给同事，也不要放进项目文件。如果当前环境没有 skill-installer，可让管理员按客户端的本地 Skill 加载方式安装整个目录；只复制 SKILL.md 会丢失参考图片和字体。
+公开仓库通常可直接下载安装，无需提供 GitHub 密码或令牌。不要把凭据放进项目文件；若工具因网络或限流要求认证，使用你自己的认证流程，不把凭据发给同事。如果当前环境没有 skill-installer，可让管理员按客户端的本地 Skill 加载方式安装整个目录；只复制 SKILL.md 会丢失参考图片和字体。
 
 安装后必须检查 `references/images` 中有 15 张参考、`assets/examples` 中有两张样例，以及 `editor/fonts`、`scripts` 均存在。部分安装器在对仓库根目录执行 Git 稀疏检出时只复制顶层文件，即使显示安装成功也可能缺资源。若安装目录保留 `.git`，可让 Codex 在该目录执行 `git sparse-checkout disable` 补齐，再检查；否则从完整克隆或 ZIP 补齐，不覆盖用户自定义内容。
 
@@ -42,7 +42,7 @@ https://github.com/Jocelyn318/talent-signal-cover
 
 已安装 Skill 的用户可让 Codex“打开 talent-signal-cover 配套编辑器”，它会定位安装目录并启动服务。
 
-也可以另行下载仓库 ZIP 并解压，或在已配置 GitHub 认证的终端运行：
+也可以另行下载仓库 ZIP 并解压，或在已安装 Git 的终端运行（公开 HTTPS 克隆通常无需认证）：
 
 ```sh
 git clone https://github.com/Jocelyn318/talent-signal-cover.git
@@ -108,12 +108,12 @@ py -3 scripts/serve.py
 - 仓库使用者要更新 Git 工作副本时，先 `git status` 确认本地没有需要保留的修改，再 `git pull --ff-only`；冲突时停止，不强制覆盖。
 - 通过安装器复制安装的 Skill 不一定自动随仓库更新。请求 Codex 更新时先备份本地定制、比较变更，再替换；不要直接删整个技能目录。
 - 新风格偏好先记录认可范围，经维护者确认后再改规范并提 PR。单张的“好看”不等于所有元素成为品牌规则。
-- 参考图片只获准随私有工作包分享，不代表拥有对外再分发授权。不要公开仓库、开启公开站点或上传密码和 API 密钥。
+- 仓库公开不代表第三方参考图片已获开源、商业使用或再分发许可；使用和传播前请核实权利，见 [素材说明](ASSET-NOTICE.md)。不要把未发布正文、客户资料、密码或 API 密钥提交到公开仓库。仓库公开不会自动部署编辑器网站。
 
 ## 7. 常见问题
 
 |问题|处理|
-|仓库打不开／404|确认账号、邀请和 Git 认证；私有仓库不会向未授权用户展示内容|
+|仓库打不开／404|核对仓库链接、网络和仓库是否迁移；当前公开仓库不需要接受邀请|
 |localhost 拒绝连接|先启动服务，检查端口和终端是否仍在运行；不要使用别人的 localhost 链接|
 |打开 `/editor/` 是 404|发行版访问 `/`，以终端显示的完整链接为准|
 |提示找不到 Python|安装 Python 3；Windows 尝试 `py -3`|
