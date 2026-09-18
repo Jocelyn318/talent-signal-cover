@@ -32,6 +32,8 @@ https://github.com/Jocelyn318/talent-signal-cover
 
 私有仓库下载需要本机 Git 凭据或相应连接权限。认证由你自己完成，不把密码、令牌或验证码发给同事，也不要放进项目文件。如果当前环境没有 skill-installer，可让管理员按客户端的本地 Skill 加载方式安装整个目录；只复制 SKILL.md 会丢失参考图片和字体。
 
+安装后必须检查 `references/images` 中有 15 张参考、`assets/examples` 中有两张样例，以及 `editor/fonts`、`scripts` 均存在。部分安装器在对仓库根目录执行 Git 稀疏检出时只复制顶层文件，即使显示安装成功也可能缺资源。若安装目录保留 `.git`，可让 Codex 在该目录执行 `git sparse-checkout disable` 补齐，再检查；否则从完整克隆或 ZIP 补齐，不覆盖用户自定义内容。
+
 安装完成后在下一轮对话使用 `$talent-signal-cover`。如果界面尚未刷新，重新打开会话或客户端后检查；仍不显示时让 Codex 检查实际安装目录是否有 SKILL.md。官方背景资料：[创建与使用 Skills](https://learn.chatgpt.com/docs/build-skills)。
 
 ## 4. 启动编辑器
