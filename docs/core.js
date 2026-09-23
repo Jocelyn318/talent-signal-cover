@@ -20,6 +20,9 @@
     const imageIndex=Number(raw.imageIndex);assert(Number.isSafeInteger(imageIndex)&&imageIndex>=0,'图片序号不正确');
     const brand=clone(raw.brand||{settings:{body:'signal',size:100},library:[]});
     assert(brand.settings&&typeof brand.settings.body==='string'&&Number.isFinite(Number(brand.settings.size))&&brand.settings.size>=50&&brand.settings.size<=180,'标识设置不正确');
+    brand.settings.colorMode=brand.settings.colorMode||'auto';
+    brand.settings.color=brand.settings.color||'#ff8254';
+    assert(['auto','custom'].includes(brand.settings.colorMode)&&/^#[0-9a-f]{6}$/i.test(brand.settings.color),'标识颜色不正确');
     assert(Array.isArray(brand.library)&&brand.library.length<=30,'标识库不正确');
     for(const item of brand.library){assert(typeof item.id==='string'&&/^custom-[a-zA-Z0-9-]+$/.test(item.id)&&typeof item.name==='string'&&item.name.length<200,'自定义标识不正确');assert(item.black||item.white,'标识图片缺失');for(const key of ['black','white'])if(item[key])image(item[key]);if(item.dimensions)for(const dims of Object.values(item.dimensions))if(dims)assert(Array.isArray(dims)&&dims.length===2&&dims.every(x=>Number.isFinite(x)&&x>0&&x<50000),'标识尺寸不正确');}
     assert(['signal','talent','jobs','none',...brand.library.map(i=>i.id)].includes(brand.settings.body),'标识不存在');

@@ -861,8 +861,10 @@
         <input type="color" id="customTextColor" value="#222222" />
       </div>
       <div class="row">
-        <label>小标题颜色</label>
+        <label for="headingColor">正文标题颜色（H1–H3）</label>
         <input type="color" id="headingColor" value="#F2EFE8" />
+        <input type="text" id="headingColorHex" value="#F2EFE8" maxlength="7" aria-label="正文标题颜色 HEX" />
+        <button type="button" id="headingOrange">封面橙色</button>
       </div>
       <div class="row">
         <label>对齐</label>
@@ -960,7 +962,7 @@
   </div>
 </div>
 
-<script src="./assets/footer-brand.js?v=20260923-zjobs-1"></script>
+<script src="./assets/footer-brand.js?v=20260923-colors-1"></script>
 <script src="./assets/editor-workspace.js?v=20260910-1"></script>
 <script>
   const $ = (id) => document.getElementById(id);
@@ -1145,6 +1147,7 @@
     return 0.2126*r + 0.7152*g + 0.0722*b;
   }
   function applyTextColor() {
+    $('headingColorHex').value=$('headingColor').value.toUpperCase();
     let main;
     if (textMode === 'custom') main = $('customTextColor').value;
     else if (textMode === 'light') main = '#F2EFE8';
@@ -1806,7 +1809,9 @@
     document.querySelectorAll('#textColorSeg button').forEach(button => button.classList.remove('active'));
     applyTextColor();
   });
-  $('headingColor').addEventListener('input', () => applyTextColor());
+  $('headingColor').addEventListener('input', () => { $('headingColorHex').value=$('headingColor').value.toUpperCase();applyTextColor(); });
+  $('headingColorHex').addEventListener('change',()=>{const v=$('headingColorHex').value.trim();if(/^#[0-9a-f]{6}$/i.test(v)){$('headingColor').value=v;$('headingColor').dispatchEvent(new Event('input',{bubbles:true}));}else $('headingColorHex').value=$('headingColor').value;});
+  $('headingOrange').onclick=()=>{$('headingColor').value='#ff8254';$('headingColor').dispatchEvent(new Event('input',{bubbles:true}));};
 
   // bg image
   $('bgFile').addEventListener('change', e => {
@@ -3025,6 +3030,7 @@
     },
     async *exportBlobs(mimeType='image/png') {
       flushBodyRender();
+      await window.FooterBrand.prepare();
       await document.fonts.ready;
       const pages = [...poster.querySelectorAll('.poster-page:not(.cover-page)')];
       document.body.dataset.measuring = 'true';
