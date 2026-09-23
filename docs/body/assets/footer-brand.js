@@ -16,9 +16,9 @@
     }); } finally { database.close(); }
   };
   const ready = transact('readonly',store=>store.getAll()).then(items=>{library=items;}).catch(()=>{});
-  function textLogo(color) {
+  function textLogo(color, text = 'ZhenTalent') {
     const canvas=document.createElement('canvas'); canvas.width=650; canvas.height=130;
-    const ctx=canvas.getContext('2d');ctx.fillStyle=color;ctx.font='bold 104px Arial, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('ZhenTalent',325,68,640);
+    const ctx=canvas.getContext('2d');ctx.fillStyle=color;ctx.font='bold 104px Arial, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,325,68,640);
     return canvas.toDataURL('image/png');
   }
   function resolve(page,tone) {
@@ -43,7 +43,7 @@
     if(logo.classList.contains('cover-talent-signal-logo')) logo.style.left=(1080-spec.width)/2+'px';
   }
   function init(black,white,render) {
-    redraw=render; builtins={signal:{name:'Talent Signal',black,white},talent:{name:'ZhenTalent',black:textLogo('#111111'),white:textLogo('#ffffff')}};
+    redraw=render; builtins={signal:{name:'Talent Signal',black,white},talent:{name:'ZhenTalent',black:textLogo('#111111'),white:textLogo('#ffffff')},jobs:{name:'Z Jobs',black:textLogo('#111111','Z Jobs'),white:textLogo('#ffffff','Z Jobs')}};
     const panel=document.createElement('div');panel.className='group';panel.id='footerBrandPanel';
     panel.innerHTML='<span class="label">底部标识</span><label for="footerChoice">整篇标识</label><select id="footerChoice"></select><label for="coverFooterChoice">封面标识</label><select id="coverFooterChoice"></select><label for="footerSize">标识大小</label><div class="row"><input id="footerSize" type="range" min="50" max="180" step="5"><output id="footerSizeValue"></output></div><details class="settings-fold"><summary>添加自定义标识</summary><label for="logoName">名称</label><input id="logoName" type="text" placeholder="例如：新栏目"><label for="logoBlack">深色 Logo（用于浅底，PNG）</label><input id="logoBlack" type="file" accept="image/png"><label for="logoWhite">浅色 Logo（用于深底，PNG，可选）</label><input id="logoWhite" type="file" accept="image/png"><p class="hint">至少上传一个版本，建议透明背景。只有一个版本时，两种底色共用。标识保存在当前浏览器。</p><button type="button" class="action" id="saveLogo">保存并使用</button><p class="hint" role="status" id="logoStatus"></p></details>';
     document.querySelector('.controls').append(panel);
@@ -51,7 +51,7 @@
     const choices=()=>{
       for(const [id,selected] of [['footerChoice',settings.body],['coverFooterChoice',settings.cover]]) {
         const select=$(id);select.replaceChildren();
-        const items=[...(id==='coverFooterChoice'?[{id:'same',name:'跟随整篇'}]:[]),{id:'signal',name:'Talent Signal'},{id:'talent',name:'ZhenTalent'},{id:'none',name:'不显示'},...library];
+        const items=[...(id==='coverFooterChoice'?[{id:'same',name:'跟随整篇'}]:[]),{id:'signal',name:'Talent Signal'},{id:'talent',name:'ZhenTalent'},{id:'jobs',name:'Z Jobs'},{id:'none',name:'不显示'},...library];
         items.forEach(item=>select.add(new Option(item.name,item.id)));
         select.value=items.some(item=>item.id===selected)?selected:(id==='coverFooterChoice'?'same':'signal');
       }
@@ -86,7 +86,7 @@
     async setProject(value){
       settings={...value.settings,cover:'same'}; library=value.library;
       const select=document.getElementById('footerChoice');
-      select.replaceChildren(...[{id:'signal',name:'Talent Signal'},{id:'talent',name:'ZhenTalent'},{id:'none',name:'不显示'},...library].map(i=>new Option(i.name,i.id)));
+      select.replaceChildren(...[{id:'signal',name:'Talent Signal'},{id:'talent',name:'ZhenTalent'},{id:'jobs',name:'Z Jobs'},{id:'none',name:'不显示'},...library].map(i=>new Option(i.name,i.id)));
       select.value=settings.body;
       document.getElementById('footerSize').value=settings.size;
       document.getElementById('footerSizeValue').textContent=settings.size+'%';
