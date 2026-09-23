@@ -5,7 +5,7 @@
   const image=src=>{assert(typeof src==='string'&&/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/=\r\n]+$/.test(src)&&src.length<46*1024*1024,'图片必须为嵌入的 PNG / JPEG / WebP，且小于 32 MB');return src;};
   function validateBody(raw){
     assert(raw&&raw.schemaVersion===1&&raw.state&&typeof raw.state==='object','正文项目格式不正确');
-    const state=clone(raw.state);state.pageRatio=state.pageRatio||'9:16';assert(['9:16','3:4'].includes(state.pageRatio),'页面比例不正确');
+    const state=clone(raw.state);state.pageRatio=state.pageRatio||'9:16';assert(['9:16','9:15','3:4'].includes(state.pageRatio),'页面比例不正确');
     for(const [k,min,max,fallback] of [['marginTop',24,400,88],['marginBottom',160,400,220],['marginLeft',24,240,64],['marginRight',24,240,64]]){
       const n=Number(state[k]??fallback);assert(Number.isFinite(n)&&n>=min&&n<=max,'页边距不正确：'+k);state[k]=String(n);
     }
@@ -32,7 +32,7 @@
     assert(['signal','talent','jobs','none',...brand.library.map(i=>i.id)].includes(brand.settings.body),'标识不存在');
     return {schemaVersion:1,state,images,imageIndex,brand};
   }
-  function validateProject(raw){assert(raw&&raw.kind==='talent-signal-studio'&&raw.schemaVersion===1,'不支持的整篇项目格式');assert(typeof raw.name==='string'&&raw.name.length<=100,'项目名不正确');assert(raw.cover&&typeof raw.cover==='object','缺少封面项目');assert(['9:16','3:4'].includes(raw.coverRatio),'封面比例不正确');return {...raw,body:validateBody(raw.body)};}
+  function validateProject(raw){assert(raw&&raw.kind==='talent-signal-studio'&&raw.schemaVersion===1,'不支持的整篇项目格式');assert(typeof raw.name==='string'&&raw.name.length<=100,'项目名不正确');assert(raw.cover&&typeof raw.cover==='object','缺少封面项目');assert(['9:16','9:15','3:4'].includes(raw.coverRatio),'封面比例不正确');return {...raw,body:validateBody(raw.body)};}
   // Uncompressed ZIP: no remote library/CDN. UTF-8 filenames, CRC32, sequential input.
   const table=Array.from({length:256},(_,i)=>{for(let j=0;j<8;j++)i=(i&1)?0xedb88320^(i>>>1):i>>>1;return i>>>0;});
   const crc32=bytes=>{let c=0xffffffff;for(const b of bytes)c=table[(c^b)&255]^(c>>>8);return (c^0xffffffff)>>>0;};

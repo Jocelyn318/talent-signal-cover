@@ -1654,7 +1654,7 @@
     }
     return blocks;
   }
-  let pageRatio='9:16'; const pageHeight=()=>pageRatio==='3:4'?1440:1920; const PAGE_SAFETY_PX = 16;
+  let pageRatio='9:16'; const pageHeight=()=>pageRatio==='3:4'?1440:pageRatio==='9:15'?1800:1920; const PAGE_SAFETY_PX = 16;
   const layoutDefaults={marginTop:88,marginBottom:220,marginLeft:64,marginRight:64,pageMode:'auto'};
   let selectedManualPage=0;
   const manualParts=()=>$('text').value.split(/\n?<!-- pagebreak -->\n?/);
@@ -2157,7 +2157,7 @@
     draftSaveTimer = setTimeout(saveDraft, 450);
   }
 
-  function restoreControlState(state) { pageRatio=state.pageRatio==='3:4'?'3:4':'9:16';
+  function restoreControlState(state) { pageRatio=['3:4','9:15'].includes(state.pageRatio)?state.pageRatio:'9:16';
     for(const [k,v] of Object.entries(layoutDefaults))$(k).value=state[k]??v;
     bodyBackground = state.bodyBackground === 'paper' ? 'paper' : 'dark';
     const valueIds = [
@@ -3088,7 +3088,7 @@
       } finally { delete document.body.dataset.measuring; window.EditorWorkspace.sync(); }
     },
     pageCount(){flushBodyRender(); return poster.querySelectorAll('.poster-page:not(.cover-page)').length;},
-    setRatio(value){pageRatio=value==='3:4'?'3:4':'9:16';render();}, refresh(){render();},
+    setRatio(value){pageRatio=['3:4','9:15'].includes(value)?value:'9:16';render();}, refresh(){render();},
     ready:null
   };
   window.bodyEditor.ready = (async () => {

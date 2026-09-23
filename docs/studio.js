@@ -21,7 +21,7 @@
     const valid=C.validateProject(raw);
     $('cover').contentWindow.TalentSignalRenderer.validateProject(valid.cover);
     const old=snapshot();
-    try{await cover.setProject(valid.cover);await body.setProject(valid.body);$('name').value=valid.name;$('ratio').value=valid.coverRatio;body.setRatio(valid.coverRatio);$('cover').contentDocument.getElementById(valid.coverRatio==='3:4'?'crop':'full').click();}
+    try{await cover.setProject(valid.cover);await body.setProject(valid.body);$('name').value=valid.name;$('ratio').value=valid.coverRatio;body.setRatio(valid.coverRatio);$('cover').contentDocument.getElementById(valid.coverRatio==='3:4'?'crop':valid.coverRatio==='9:15'?'medium':'full').click();}
     catch(e){await cover.setProject(old.cover);await body.setProject(old.body);throw e;}
   }
   function canvasBlob(canvas,mime){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('封面编码失败')),mime,.96));}
@@ -59,7 +59,7 @@
     catch(err){status('未载入：'+err.message+'。当前项目保留。',true);}
     finally{setBusy(false);changed();}
   };
-  $('name').oninput=changed;$('ratio').onchange=()=>{body.setRatio($('ratio').value);$('cover').contentDocument.getElementById($('ratio').value==='3:4'?'crop':'full').click();changed();status('比例已更新 · 请检查分页及封面中央裁切');if($('preview').classList.contains('active'))preview();};
+  $('name').oninput=changed;$('ratio').onchange=()=>{body.setRatio($('ratio').value);$('cover').contentDocument.getElementById($('ratio').value==='3:4'?'crop':$('ratio').value==='9:15'?'medium':'full').click();changed();status('比例已更新 · 请检查分页及封面中央裁切');if($('preview').classList.contains('active'))preview();};
   $('export').onclick=()=>{$('exportDialog').showModal();};
   $('scope').onchange=()=>{};
   $('download').onclick=async()=>{if(busy)return;setBusy(true);const dialog=$('exportDialog');dialog.oncancel=e=>e.preventDefault();dialog.querySelectorAll('button,select').forEach(x=>x.disabled=true);
@@ -79,7 +79,7 @@
       [cover,body]=await Promise.all([waitApi($('cover'),'coverEditor'),waitApi($('body'),'bodyEditor')]);
       try{db=await connectDb();const saved=await store('readonly',s=>s.get('current'));if(saved)await applyProject(saved);}
       catch(e){storageBroken=true;status('草稿恢复不可用：'+e.message+'；请用项目文件保存',true);}
-      body.setRatio($('ratio').value);$('cover').contentDocument.getElementById($('ratio').value==='3:4'?'crop':'full').click();ready=true;lastSaved=storageBroken?'':JSON.stringify(snapshot());setBusy(false);
+      body.setRatio($('ratio').value);$('cover').contentDocument.getElementById($('ratio').value==='3:4'?'crop':$('ratio').value==='9:15'?'medium':'full').click();ready=true;lastSaved=storageBroken?'':JSON.stringify(snapshot());setBusy(false);
       if(!storageBroken)status('已就绪 · 自动保存在此浏览器');
       for(const id of ['cover','body']){$(id).contentWindow.addEventListener('studiochange',changed);$(id).contentDocument.addEventListener('keydown',shortcut);}
       // Catch programmatic changes / undo as well as UI events, without modifying the cover engine.
