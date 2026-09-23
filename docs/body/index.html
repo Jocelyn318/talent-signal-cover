@@ -241,7 +241,7 @@
   }
   .poster-page {
     width: 1080px;
-    height: 1800px;
+    height: var(--page-height,1920px);
     position: relative;
     overflow: hidden;
     background: #F7F5EF;
@@ -925,7 +925,7 @@
 
     <div class="group" id="pageLayoutPanel">
       <span class="label">页边距与分页</span>
-      <p class="hint">单位为画布像素（1080 × 1800）。底部至少保留 160 px，避免与标识重叠。</p>
+      <p class="hint">宽 1080 px，页高跟随整组比例。底部至少保留 160 px，避免与标识重叠。</p>
       <div class="row"><label for="marginTop">上边距</label><input type="number" id="marginTop" min="24" max="400" value="88"></div>
       <div class="row"><label for="marginBottom">下边距</label><input type="number" id="marginBottom" min="160" max="400" value="220"></div>
       <div class="row"><label for="marginLeft">左边距</label><input type="number" id="marginLeft" min="24" max="240" value="64"></div>
@@ -1654,7 +1654,7 @@
     }
     return blocks;
   }
-  const PAGE_SAFETY_PX = 16;
+  let pageRatio='9:16'; const pageHeight=()=>pageRatio==='3:4'?1440:1920; const PAGE_SAFETY_PX = 16;
   const layoutDefaults={marginTop:88,marginBottom:220,marginLeft:64,marginRight:64,pageMode:'auto'};
   let selectedManualPage=0;
   const manualParts=()=>$('text').value.split(/\n?<!-- pagebreak -->\n?/);
@@ -1757,7 +1757,7 @@
       const value=Math.max(Number(el.min),Math.min(Number(el.max),Number.isFinite(n)?n:layoutDefaults['margin'+side]));
       poster.style.setProperty('--margin-'+side.toLowerCase(),value+'px');
     }
-    poster.innerHTML = '';
+    poster.style.setProperty('--page-height',pageHeight()+'px'); poster.innerHTML = '';
     const blocks = markdownBlocks($('text').value);
     const hasCover = false;
     if ($('pageMode').value==='manual') {
@@ -2066,7 +2066,7 @@
       articleLayoutVersion: 3,
       align: activeSegmentValue('alignSeg', 'justify'),
       weight: activeSegmentValue('weightSeg', '400'),
-      vAlign: activeSegmentValue('vAlignSeg', 'center'),
+      vAlign: activeSegmentValue('vAlignSeg', 'center'), pageRatio,
       ...Object.fromEntries(Object.keys(layoutDefaults).map(k=>[k,$(k).value])),
     };
   }
@@ -2157,7 +2157,7 @@
     draftSaveTimer = setTimeout(saveDraft, 450);
   }
 
-  function restoreControlState(state) {
+  function restoreControlState(state) { pageRatio=state.pageRatio==='3:4'?'3:4':'9:16';
     for(const [k,v] of Object.entries(layoutDefaults))$(k).value=state[k]??v;
     bodyBackground = state.bodyBackground === 'paper' ? 'paper' : 'dark';
     const valueIds = [
@@ -2275,12 +2275,12 @@
     const pad = 80;
     const availW = stage.clientWidth - pad;
     const availH = Math.max(480, stage.clientHeight - 120);
-    const scale = Math.min(availW/1080, availH/1800, 1);
+    const scale = Math.min(availW/1080, availH/pageHeight(), 1);
     $('previewWrap').style.transform = 'none';
     $('previewWrap').style.zoom = scale;
     const pageCount = Math.max(1, [...poster.querySelectorAll('.poster-page')].filter(page => getComputedStyle(page).display !== 'none').length);
     $('previewWrap').style.width = '1080px';
-    $('previewWrap').style.height = (1800*pageCount + 48*(pageCount-1))+'px';
+    $('previewWrap').style.height = (pageHeight()*pageCount + 48*(pageCount-1))+'px';
   }
   window.addEventListener('resize', fitPreview);
 
@@ -2905,7 +2905,7 @@
   function renderPageToBlob(page, css, mimeType) {
     return (async () => {
       await document.fonts.ready;
-      const w = 1080, h = 1800;
+      const w = 1080, h = pageHeight();
       // Draw directly at the final 2x export size. The former 3x -> 1x
       // downsample softened glyph edges even before JPEG compression.
       const SCALE = 2;
@@ -3056,7 +3056,7 @@
     }, render, fitPreview, flush: flushBodyRender, exportPages, insert: insertTextAtCursor, format: applyMarkdownAction});
 
   // A small adapter exposes body-only state, never the retired cover implementation.
-  const bodyKeys = ['bodyBackground','text','archiveNum','bodyFont','bodyFontVersion','fs','lh','ls','pg','customColor','customTextColor','headingColor','textMode','articleLayoutVersion','align','weight','vAlign',...Object.keys(layoutDefaults)];
+  const bodyKeys = ['bodyBackground','text','archiveNum','bodyFont','bodyFontVersion','fs','lh','ls','pg','customColor','customTextColor','headingColor','textMode','articleLayoutVersion','align','weight','vAlign',...Object.keys(layoutDefaults),'pageRatio'];
   window.bodyEditor = {
     getProject() {
       const state = collectDraftState();
@@ -3088,7 +3088,7 @@
       } finally { delete document.body.dataset.measuring; window.EditorWorkspace.sync(); }
     },
     pageCount(){flushBodyRender(); return poster.querySelectorAll('.poster-page:not(.cover-page)').length;},
-    refresh(){render();},
+    setRatio(value){pageRatio=value==='3:4'?'3:4':'9:16';render();}, refresh(){render();},
     ready:null
   };
   window.bodyEditor.ready = (async () => {

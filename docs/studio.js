@@ -6,7 +6,7 @@
   const snapshot=()=>({kind:'talent-signal-studio',schemaVersion:1,name:$('name').value,coverRatio:$('ratio').value,cover:cover.getProject(),body:body.getProject()});
   const filename=()=>($('name').value||'Talent-Signal').replace(/[\\/:*?"<>|\x00-\x1f]/g,'-');
   function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}
-  function setBusy(value){busy=value;$('workspace').inert=value;for(const el of document.querySelectorAll('header button,#name,#refresh,#download'))el.disabled=value||!ready;}
+  function setBusy(value){busy=value;$('workspace').inert=value;for(const el of document.querySelectorAll('header button,#name,#ratio,#refresh,#download'))el.disabled=value||!ready;}
   function connectDb(){return new Promise((resolve,reject)=>{const r=indexedDB.open('talent-signal-studio-v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('projects');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.onblocked=()=>reject(Error('请关闭旧工作台后重试'));});}
   function store(mode,operation){return new Promise((resolve,reject)=>{const tx=db.transaction('projects',mode),r=operation(tx.objectStore('projects'));tx.oncomplete=()=>resolve(r.result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});}
   async function autosave(){
@@ -21,7 +21,7 @@
     const valid=C.validateProject(raw);
     $('cover').contentWindow.TalentSignalRenderer.validateProject(valid.cover);
     const old=snapshot();
-    try{await cover.setProject(valid.cover);await body.setProject(valid.body);$('name').value=valid.name;$('ratio').value=valid.coverRatio;}
+    try{await cover.setProject(valid.cover);await body.setProject(valid.body);$('name').value=valid.name;$('ratio').value=valid.coverRatio;body.setRatio(valid.coverRatio);$('cover').contentDocument.getElementById(valid.coverRatio==='3:4'?'crop':'full').click();}
     catch(e){await cover.setProject(old.cover);await body.setProject(old.body);throw e;}
   }
   function canvasBlob(canvas,mime){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('封面编码失败')),mime,.96));}
@@ -38,7 +38,7 @@
         const bitmap=await createImageBitmap(entry.blob),canvas=document.createElement('canvas');canvas.width=360;canvas.height=Math.round(bitmap.height*360/bitmap.width);canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
         const url=URL.createObjectURL(await canvasBlob(canvas,'image/png'));urls.push(url);
         const figure=document.createElement('figure'),img=new Image(),caption=document.createElement('figcaption');img.src=url;img.alt=entry.name;caption.textContent=entry.name;figure.append(img,caption);$('gallery').append(figure);
-      }status('预览已更新 · 封面与正文保持原比例');
+      }status('预览已更新 · 封面与正文比例一致');
     }catch(e){status('预览失败：'+e.message,true);}finally{setBusy(false);changed();}
   }
   function tab(id){
@@ -59,16 +59,16 @@
     catch(err){status('未载入：'+err.message+'。当前项目保留。',true);}
     finally{setBusy(false);changed();}
   };
-  $('name').oninput=changed;$('ratio').onchange=changed;
+  $('name').oninput=changed;$('ratio').onchange=()=>{body.setRatio($('ratio').value);$('cover').contentDocument.getElementById($('ratio').value==='3:4'?'crop':'full').click();changed();status('比例已更新 · 请检查分页及封面中央裁切');if($('preview').classList.contains('active'))preview();};
   $('export').onclick=()=>{$('exportDialog').showModal();};
-  $('scope').onchange=()=>{$('ratio').disabled=$('scope').value==='body';};
+  $('scope').onchange=()=>{};
   $('download').onclick=async()=>{if(busy)return;setBusy(true);const dialog=$('exportDialog');dialog.oncancel=e=>e.preventDefault();dialog.querySelectorAll('button,select').forEach(x=>x.disabled=true);
     try{const scope=$('scope').value,mime=$('format').value;
       if(scope==='cover'){for await(const entry of entries(scope,mime))download(entry.blob,filename()+'-'+entry.name);}
       else download(await C.zip(entries(scope,mime)),filename()+'.zip');
       dialog.close();status('导出完成 · 文件已下载');
     }catch(e){status('导出失败：'+e.message,true);}
-    finally{dialog.oncancel=null;dialog.querySelectorAll('button,select').forEach(x=>x.disabled=false);$('ratio').disabled=$('scope').value==='body';setBusy(false);}
+    finally{dialog.oncancel=null;dialog.querySelectorAll('button,select').forEach(x=>x.disabled=false);setBusy(false);}
   };
   function shortcut(e){if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){e.preventDefault();$('save').click();}}
   document.addEventListener('keydown',shortcut);
@@ -79,7 +79,7 @@
       [cover,body]=await Promise.all([waitApi($('cover'),'coverEditor'),waitApi($('body'),'bodyEditor')]);
       try{db=await connectDb();const saved=await store('readonly',s=>s.get('current'));if(saved)await applyProject(saved);}
       catch(e){storageBroken=true;status('草稿恢复不可用：'+e.message+'；请用项目文件保存',true);}
-      ready=true;lastSaved=storageBroken?'':JSON.stringify(snapshot());setBusy(false);
+      body.setRatio($('ratio').value);$('cover').contentDocument.getElementById($('ratio').value==='3:4'?'crop':'full').click();ready=true;lastSaved=storageBroken?'':JSON.stringify(snapshot());setBusy(false);
       if(!storageBroken)status('已就绪 · 自动保存在此浏览器');
       for(const id of ['cover','body']){$(id).contentWindow.addEventListener('studiochange',changed);$(id).contentDocument.addEventListener('keydown',shortcut);}
       // Catch programmatic changes / undo as well as UI events, without modifying the cover engine.

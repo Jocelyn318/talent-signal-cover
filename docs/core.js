@@ -5,7 +5,7 @@
   const image=src=>{assert(typeof src==='string'&&/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/=\r\n]+$/.test(src)&&src.length<46*1024*1024,'图片必须为嵌入的 PNG / JPEG / WebP，且小于 32 MB');return src;};
   function validateBody(raw){
     assert(raw&&raw.schemaVersion===1&&raw.state&&typeof raw.state==='object','正文项目格式不正确');
-    const state=clone(raw.state);
+    const state=clone(raw.state);state.pageRatio=state.pageRatio||'9:16';assert(['9:16','3:4'].includes(state.pageRatio),'页面比例不正确');
     for(const [k,min,max,fallback] of [['marginTop',24,400,88],['marginBottom',160,400,220],['marginLeft',24,240,64],['marginRight',24,240,64]]){
       const n=Number(state[k]??fallback);assert(Number.isFinite(n)&&n>=min&&n<=max,'页边距不正确：'+k);state[k]=String(n);
     }
