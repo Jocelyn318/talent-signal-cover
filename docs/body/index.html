@@ -268,7 +268,7 @@
     height: 100%;
     display: flex; flex-direction: column;
     /* Reserves clear space for the fixed footer logo on every page. */
-    padding: 88px 64px 220px;
+    padding: var(--margin-top,88px) var(--margin-right,64px) var(--margin-bottom,220px) var(--margin-left,64px);
   }
   .poster-page .body {
     flex: 1;
@@ -923,6 +923,23 @@
       </div>
     </div>
 
+    <div class="group" id="pageLayoutPanel">
+      <span class="label">页边距与分页</span>
+      <p class="hint">单位为画布像素（1080 × 1800）。底部至少保留 160 px，避免与标识重叠。</p>
+      <div class="row"><label for="marginTop">上边距</label><input type="number" id="marginTop" min="24" max="400" value="88"></div>
+      <div class="row"><label for="marginBottom">下边距</label><input type="number" id="marginBottom" min="160" max="400" value="220"></div>
+      <div class="row"><label for="marginLeft">左边距</label><input type="number" id="marginLeft" min="24" max="240" value="64"></div>
+      <div class="row"><label for="marginRight">右边距</label><input type="number" id="marginRight" min="24" max="240" value="64"></div>
+      <button type="button" id="compactLayout">紧凑排版：顶部对齐 / 64 / 160 / 64 / 64</button>
+      <label for="pageMode">分页方式</label><select id="pageMode"><option value="auto">自动分页（标题另起页）</option><option value="manual">手动逐页（内容超出会提示）</option></select>
+      <div id="manualPagePanel" hidden>
+        <label for="pageSelect">编辑哪一页</label><select id="pageSelect"></select>
+        <textarea id="pageText" rows="10" aria-label="本页内容" placeholder="本页 Markdown 内容"></textarea>
+        <div class="row"><button type="button" id="pageAdd">后插一页</button><button type="button" id="pageDelete">删除本页</button><button type="button" id="pageUp">前移</button><button type="button" id="pageDown">后移</button></div>
+        <p class="hint">本页内容与上方全文同步。移动部分内容时，剪切后切换页面粘贴；也可在全文用分页标记分配内容。手动模式不再按标题或溢出自动拆页。</p>
+      </div>
+      <p id="pageOverflow" class="hint" role="status"></p>
+    </div>
     <div class="group">
       <span class="label">品牌标识</span>
       <p class="hint" style="margin-top:0">每一页底部固定显示 Zhen Origin Logo。</p>
@@ -962,7 +979,7 @@
   </div>
 </div>
 
-<script src="./assets/footer-brand.js?v=20260923-colors-1"></script>
+<script src="./assets/footer-brand.js?v=20260923-layout-1"></script>
 <script src="./assets/editor-workspace.js?v=20260910-1"></script>
 <script>
   const $ = (id) => document.getElementById(id);
@@ -1637,7 +1654,18 @@
     }
     return blocks;
   }
-  const PAGE_SAFETY_PX = 96;
+  const PAGE_SAFETY_PX = 16;
+  const layoutDefaults={marginTop:88,marginBottom:220,marginLeft:64,marginRight:64,pageMode:'auto'};
+  let selectedManualPage=0;
+  const manualParts=()=>$('text').value.split(/\n?<!-- pagebreak -->\n?/);
+  function syncManualPages(){
+    $('manualPagePanel').hidden=$('pageMode').value!=='manual';
+    const parts=manualParts();selectedManualPage=Math.max(0,Math.min(selectedManualPage,parts.length-1));
+    $('pageSelect').replaceChildren(...parts.map((_,i)=>new Option('第 '+(i+1)+' 页',String(i))));
+    $('pageSelect').value=String(selectedManualPage);
+    if(document.activeElement!==$('pageText'))$('pageText').value=parts[selectedManualPage];
+  }
+  function writeManualParts(parts){$('text').value=parts.join('\n<!-- pagebreak -->\n');render();scheduleDraftSave();}
   function overflows(body, safety = 0) {
     if (body.scrollHeight > body.clientHeight + 1) return true;
     if (!safety || !body.lastElementChild) return false;
@@ -1724,10 +1752,17 @@
       bodyRenderTimer = null;
     }
     document.body.dataset.measuring = 'true';
+    for(const side of ['Top','Bottom','Left','Right']){
+      const el=$('margin'+side),n=Number(el.value);
+      const value=Math.max(Number(el.min),Math.min(Number(el.max),Number.isFinite(n)?n:layoutDefaults['margin'+side]));
+      poster.style.setProperty('--margin-'+side.toLowerCase(),value+'px');
+    }
     poster.innerHTML = '';
     const blocks = markdownBlocks($('text').value);
     const hasCover = false;
-    if (blocks.length) {
+    if ($('pageMode').value==='manual') {
+      manualParts().forEach(part=>{const state=createPage();markdownBlocks(part).forEach(block=>state.body.appendChild(block));});
+    } else if (blocks.length) {
       const state = createPage();
       blocks.forEach(block => appendBlock(state, block));
     } else if (!hasCover) createPage();
@@ -1737,6 +1772,9 @@
       p.classList.toggle('valign-center', vAlign === 'center');
       p.classList.toggle('valign-start', vAlign === 'start');
     });
+    const overflowPages=[...poster.querySelectorAll('.poster-page')].flatMap((p,i)=>overflows(p.querySelector('.body'))?[i+1]:[]);
+    $('pageOverflow').textContent=overflowPages.length?'第 '+overflowPages.join('、')+' 页内容超出：请移到下一页、减小字号或调整页边距，修正后才能导出。':'';
+    syncManualPages();
     applyTextColor();
     fitAllCoverTitles();
     delete document.body.dataset.measuring;
@@ -1794,6 +1832,14 @@
   });
   bindSeg('weightSeg', v => { poster.style.setProperty('--fw', v); render(); });
   bindSeg('vAlignSeg', v => render());
+  for(const key of Object.keys(layoutDefaults).filter(k=>k!=='pageMode'))$(key).addEventListener('change',()=>{const el=$(key);el.value=Math.max(Number(el.min),Math.min(Number(el.max),Number(el.value)||layoutDefaults[key]));render();scheduleDraftSave();});
+  $('compactLayout').onclick=()=>{Object.entries({marginTop:64,marginBottom:160,marginLeft:64,marginRight:64}).forEach(([k,v])=>$(k).value=v);activateSegment('vAlignSeg','start');render();scheduleDraftSave();};
+  $('pageMode').onchange=()=>{if($('pageMode').value==='manual'&&!$('text').value.includes('<!-- pagebreak -->'))$('text').value=$('text').value.replace(/\n(?=# )/g,'\n<!-- pagebreak -->\n');render();scheduleDraftSave();};
+  $('pageSelect').onchange=()=>{selectedManualPage=Number($('pageSelect').value);syncManualPages();};
+  $('pageText').oninput=()=>{const parts=manualParts();parts[selectedManualPage]=$('pageText').value;writeManualParts(parts);};
+  $('pageAdd').onclick=()=>{const parts=manualParts();parts.splice(++selectedManualPage,0,'');writeManualParts(parts);};
+  $('pageDelete').onclick=()=>{if(!confirm('删除本页内容？请先保存项目以便恢复。'))return;const parts=manualParts();parts.splice(selectedManualPage,1);writeManualParts(parts.length?parts:['']);};
+  for(const [id,delta] of [['pageUp',-1],['pageDown',1]])$(id).onclick=()=>{const parts=manualParts(),next=selectedManualPage+delta;if(next<0||next>=parts.length)return;[parts[next],parts[selectedManualPage]]=[parts[selectedManualPage],parts[next]];selectedManualPage=next;writeManualParts(parts);};
 
   // custom color
   $('customColor').addEventListener('input', e => {
@@ -2021,6 +2067,7 @@
       align: activeSegmentValue('alignSeg', 'justify'),
       weight: activeSegmentValue('weightSeg', '400'),
       vAlign: activeSegmentValue('vAlignSeg', 'center'),
+      ...Object.fromEntries(Object.keys(layoutDefaults).map(k=>[k,$(k).value])),
     };
   }
 
@@ -2111,6 +2158,7 @@
   }
 
   function restoreControlState(state) {
+    for(const [k,v] of Object.entries(layoutDefaults))$(k).value=state[k]??v;
     bodyBackground = state.bodyBackground === 'paper' ? 'paper' : 'dark';
     const valueIds = [
       'text', 'coverTitle', 'archiveNum',
@@ -3008,7 +3056,7 @@
     }, render, fitPreview, flush: flushBodyRender, exportPages, insert: insertTextAtCursor, format: applyMarkdownAction});
 
   // A small adapter exposes body-only state, never the retired cover implementation.
-  const bodyKeys = ['bodyBackground','text','archiveNum','bodyFont','bodyFontVersion','fs','lh','ls','pg','customColor','customTextColor','headingColor','textMode','articleLayoutVersion','align','weight','vAlign'];
+  const bodyKeys = ['bodyBackground','text','archiveNum','bodyFont','bodyFontVersion','fs','lh','ls','pg','customColor','customTextColor','headingColor','textMode','articleLayoutVersion','align','weight','vAlign',...Object.keys(layoutDefaults)];
   window.bodyEditor = {
     getProject() {
       const state = collectDraftState();
@@ -3030,6 +3078,7 @@
     },
     async *exportBlobs(mimeType='image/png') {
       flushBodyRender();
+      if($('pageOverflow').textContent)throw Error($('pageOverflow').textContent);
       await window.FooterBrand.prepare();
       await document.fonts.ready;
       const pages = [...poster.querySelectorAll('.poster-page:not(.cover-page)')];

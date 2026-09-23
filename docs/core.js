@@ -6,6 +6,10 @@
   function validateBody(raw){
     assert(raw&&raw.schemaVersion===1&&raw.state&&typeof raw.state==='object','正文项目格式不正确');
     const state=clone(raw.state);
+    for(const [k,min,max,fallback] of [['marginTop',24,400,88],['marginBottom',160,400,220],['marginLeft',24,240,64],['marginRight',24,240,64]]){
+      const n=Number(state[k]??fallback);assert(Number.isFinite(n)&&n>=min&&n<=max,'页边距不正确：'+k);state[k]=String(n);
+    }
+    state.pageMode=state.pageMode||'auto';assert(['auto','manual'].includes(state.pageMode),'分页方式不正确');
     assert(typeof state.text==='string'&&state.text.length<=300000,'正文超过 30 万字符或格式不正确');
     const ranges={fs:[28,80],lh:[1.2,2.6],ls:[-2,12],pg:[10,110]};
     for(const [key,[min,max]] of Object.entries(ranges)){const n=Number(state[key]);assert(Number.isFinite(n)&&n>=min&&n<=max,'正文参数不正确：'+key);state[key]=String(n);}
