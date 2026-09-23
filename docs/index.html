@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Talent Signal · 创作工作台</title><link rel="stylesheet" href="studio.css"></head>
+<body>
+<header><div class="brand"><span>TS</span><div><strong>Talent Signal</strong><small>创作工作台 / STUDIO</small></div></div>
+<nav aria-label="编辑模块"><button data-tab="cover" aria-selected="true">01 封面</button><button data-tab="body" aria-selected="false">02 正文</button><button data-tab="preview" aria-selected="false">03 整组预览</button></nav>
+<div class="actions"><button id="open" disabled>打开项目</button><button id="save" disabled>保存项目</button><button id="export" class="primary" disabled>导出图片 ↗</button></div></header>
+<div class="meta"><label>项目名称 <input id="name" value="Talent Signal" maxlength="100" disabled></label><span id="status" role="status">正在加载编辑器与本地字体…</span><span>本机处理 · 不上传内容</span></div>
+<main id="workspace"><iframe id="cover" class="panel active" title="Talent Signal 封面编辑器" src="cover/index.html"></iframe><iframe id="body" class="panel" title="正文编辑器（不含封面）" src="body/index.html" inert></iframe>
+<section id="preview" class="panel" inert><div class="preview-heading"><div><h1>从封面到最后一页。</h1><p>保留各自原始比例，不拉伸、不重复叠加标题。封面由 Talent Signal 标准编辑器渲染。</p></div><button id="refresh">刷新预览</button></div><div id="gallery"></div></section></main>
+<dialog id="exportDialog"><form method="dialog"><h2>导出图片</h2><p>保持原尺寸：封面 1080×1920 / 1080×1440；正文 2160×3600。</p><label>范围<select id="scope"><option value="all">整组：封面 + 正文</option><option value="cover">仅封面</option><option value="body">仅正文</option></select></label><label>封面比例<select id="ratio"><option value="9:16">9:16 完整封面</option><option value="3:4">3:4 中央裁切</option></select></label><label>格式<select id="format"><option value="image/png">PNG 无损</option><option value="image/jpeg">JPG</option></select></label><p>多张图片打包为 ZIP，按顺序编号；封面不会进入正文排版引擎。</p><div class="dialog-actions"><button value="cancel">取消</button><button id="download" type="button" class="primary">开始导出</button></div></form></dialog>
+<input id="file" type="file" accept=".json,application/json" hidden>
+<script src="core.js"></script><script src="studio.js"></script></body></html>

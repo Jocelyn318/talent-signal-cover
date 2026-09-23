@@ -1,0 +1,49 @@
+[hidden] { display: none !important; }
+body { height: 100vh; overflow: hidden; }
+.app-bar { min-height: 76px; flex-shrink: 0; gap: 20px; padding: 14px 28px; background: #171819; }
+.app-bar .mark { width: 100px; }
+.app-bar h1 { font-size: 14px; white-space: nowrap; }
+.app-bar h1 span { display: block; margin: 5px 0 0; font-size: 11px; color: #8e9196; }
+.draft-status { margin-left: auto; font-size: 11px; }
+.workspace-tabs { display: flex; padding: 4px; gap: 4px; border: 1px solid #353638; border-radius: 12px; background: #101112; }
+.workspace-tabs button { color: #989ba0; border: 0; background: transparent; border-radius: 8px; padding: 10px 28px; cursor: pointer; font: inherit; font-size: 13px; }
+.workspace-tabs button[aria-pressed=true] { background: #ece8de; color: #222; }
+.workspace-export { background: #e9e5d9; color: #252620; padding: 12px 20px; border: 0; border-radius: 9px; font: inherit; font-size: 13px; cursor: pointer; }
+button:disabled { opacity: .45; cursor: wait; }
+button:focus-visible, summary:focus-visible { outline: 2px solid #d8c99e; outline-offset: 4px; }
+.layout { min-height: 0; overflow: hidden; }
+.controls { width: 420px; height: 100%; max-height: none; position: static; padding: 28px 26px 40px; background: #191a1c; }
+.group { margin-bottom: 24px; }
+.group > .label { color: #e9e5da; font-size: 13px; letter-spacing: .5px; }
+#text { min-height: 300px; height: 36vh; font-size: 14px; line-height: 1.9; padding: 16px; background: #202124; }
+.markdown-toolbar { gap: 5px; }
+.markdown-toolbar button { min-height: 32px; }
+.settings-fold { border-top: 1px solid #323336; padding: 15px 0 0; margin-top: 16px; }
+.settings-fold summary { cursor: pointer; color: #c6c7c9; font-size: 13px; margin-bottom: 16px; }
+.settings-fold:not([open]) summary { margin-bottom: 0; }
+.hint { font-size: 11px; color: #8b8e93; line-height: 1.8; }
+.stage { flex: 1; min-width: 0; height: 100%; position: relative; overflow: auto; padding: 68px 40px 40px; background: #101112; }
+.workspace-stage-bar { position: absolute; top: 23px; left: 32px; right: 32px; display: flex; justify-content: space-between; font-size: 12px; color: #b2b3b5; }
+#workspaceCount { color: #777b80; font-size: 11px; }
+body[data-mode=body]:not([data-measuring]) .poster-page.cover-page,
+body[data-mode=cover]:not([data-measuring]) .poster-page:not(.cover-page) { display: none; }
+.cover-empty { margin: 15vh auto 0; text-align: center; color: #ddd9d0; }
+.cover-empty h2 { font-size: 23px; font-weight: 500; }
+.cover-empty p { font-size: 13px; line-height: 1.9; color: #8e9297; }
+.empty-symbol { display: inline-grid; place-items: center; width: 60px; height: 72px; border: 1px dashed #62635f; border-radius: 9px; font-size: 26px; color: #b5b2a8; }
+.cover-empty button { margin-top: 16px; border: 1px solid #454641; border-radius: 8px; padding: 12px 18px; color: #e2ded3; background: #242521; cursor: pointer; }
+#exportDialog { background: #202124; color: #eee9de; border: 1px solid #494b4f; border-radius: 18px; padding: 28px; width: min(420px, 90vw); }
+#exportDialog::backdrop { background: #000a; backdrop-filter: blur(5px); }
+.dialog-heading { display: flex; align-items: center; justify-content: space-between; }
+.dialog-heading h2 { margin: 0; font-size: 20px; }
+.dialog-heading button { border: 0; background: transparent; color: #ddd; font-size: 26px; cursor: pointer; }
+#exportDialog label { display: block; margin: 22px 0 9px; font-size: 13px; }
+#downloadSelection { width: 100%; margin-top: 12px; }
+@media(max-width: 1000px) { .controls { width: 350px; padding: 20px; } .app-bar .mark { display: none; } .app-bar { padding: 12px 18px; gap: 12px; } .workspace-tabs button { padding: 10px 18px; } }
+@media(max-width: 700px) { body { height: auto; overflow: auto; } .app-bar { flex-wrap: wrap; position: sticky; top: 0; z-index: 10; } .draft-status { display: none; } .workspace-tabs { margin-left: auto; } .workspace-export { padding: 11px; } .layout { overflow: visible; } .controls { width: 100%; height: auto; max-height: none; } .stage { min-height: 650px; height: auto; overflow: hidden; padding: 66px 20px 30px; } #text { height: 270px; } }
+.stage { align-items: flex-start; }
+.cover-empty + .preview-wrap { flex-shrink: 0; }
+body[data-mode=cover] .cover-empty:not([hidden]) + .preview-wrap { display: none; }
+@media(min-width: 701px) { .layout { flex-direction: row; } }
+#footerBrandPanel > label, #footerBrandPanel details > label { display:block; color:#aaa; font-size:12px; margin:14px 0 8px; }
+#footerBrandPanel input[type=file] { display:block; max-width:100%; font-size:12px; color:#aaa; }
